@@ -21,21 +21,17 @@
 # database.
 #
 # the maxmind geoip.bundle file either needs to live in the right place in the
-# system ruby directories or in lib/ .  it was such a pain to get properly built
+# system ruby directories or in lib/net/ .  it was such a pain to get properly built
 # on osx that i found both options useful.
 #
 # the maxmind database can be specified using the :geodb_path argument.  the
 # default is /usr/local/share/GeoIP/GeoLiteCity.dat .
 #
 
-$:.unshift File.expand_path(File.dirname(__FILE__)) + '../'
+$:.unshift File.expand_path(File.dirname(__FILE__)) + '../net/'
 
 require 'rack'
-begin
-  require 'geoip'
-rescue
-  require 'net/geoip'
-end
+require 'net/geoip'
 
 module Rack
 	class GeoIP
