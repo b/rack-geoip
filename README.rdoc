@@ -1,0 +1,3 @@
+== rack-geoip
+
+Rack middleware to perform IP to geo lookups on HTTP client IP addresses.
