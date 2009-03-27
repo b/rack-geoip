@@ -42,20 +42,37 @@ module Rack
       @geodb = Net::GeoIP.new(geodb_path)
     end
 
+    def nullify(env)
+      env['geoip.country_code'] =
+      env['geoip.region'] =
+      env['geoip.city'] =
+      env['geoip.latitude'] =
+      env['geoip.longitude'] = nil
+    end
+    
     def call(env)
+      found = false
       begin
         rec = geodb[env["REMOTE_ADDR"]]
-        env['geoip.country_code'] = rec.country_code
-        env['geoip.region'] = rec.region
-        env['geoip.city'] = rec.city
-        env['geoip.latitude'] = rec.latitude
-        env['geoip.longitude'] = rec.longitude
+        found = true
       rescue Net::GeoIP::RecordNotFoundError
-        env['geoip.country_code'] =
-        env['geoip.region'] =
-        env['geoip.city'] =
-        env['geoip.latitude'] =
-        env['geoip.longitude'] = nil
+        found = false
+      end
+      
+      if found
+        begin
+          env['geoip.country_code'] = rec.country_code
+          env['geoip.region'] = rec.region
+          env['geoip.city'] = rec.city
+          env['geoip.latitude'] = rec.latitude
+          env['geoip.longitude'] = rec.longitude
+        rescue StandardError => e
+          # unclear why this ever happens: NULL pointer given
+          # bug in Net::GeoIP?
+          nullify(env)
+        end
+      else
+        nullify(env)
       end
       
       @app.call(env)
